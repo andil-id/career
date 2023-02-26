@@ -61,3 +61,19 @@ func DbPort() string {
 	}
 	return env
 }
+
+// * firebase env
+func FirebaseProjectId() string {
+	env := os.Getenv("FIREBASE_PROJECT_ID")
+	if env == "" {
+		panic("can't load env firebase project id")
+	}
+	return env
+}
+func FirebaseBucketName() string {
+	env := os.Getenv("FIREBASE_BUCKET_NAME")
+	if env == "" {
+		panic("can't load env firebase bucket name")
+	}
+	return env
+}
