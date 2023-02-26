@@ -26,11 +26,34 @@ func (r *JobRespositoryImpl) CreateJob(ctx context.Context, tx *sql.Tx, job doma
 	return id, nil
 }
 
-func (r *JobRespositoryImpl) GetAllJob(ctx context.Context, db *sql.DB, companyName string, categoryId string, limit string, offset string) ([]domain.Job, error) {
-	SQL := "SELECT * FROM job WHERE category_id LIKE ? OR company_name LIKE ? LIMIT ? OFFSET ?"
-	rows, err := db.QueryContext(ctx, SQL, categoryId, companyName, limit, offset)
-	if err != nil {
-		panic(err)
+func (r *JobRespositoryImpl) GetAllJob(ctx context.Context, db *sql.DB, companyName string, categoryId string, limit int, offset int) ([]domain.Job, error) {
+	var err error
+	var rows *sql.Rows
+
+	if companyName != "" && categoryId != "" {
+		SQL := "SELECT * FROM job WHERE category_id = ? AND company_name LIKE ? LIMIT ? OFFSET ?"
+		rows, err = db.QueryContext(ctx, SQL, categoryId, companyName, limit, offset)
+		if err != nil {
+			panic(err)
+		}
+	} else if companyName != "" {
+		SQL := "SELECT * FROM job WHERE company_name LIKE ? LIMIT ? OFFSET ?"
+		rows, err = db.QueryContext(ctx, SQL, companyName, limit, offset)
+		if err != nil {
+			panic(err)
+		}
+	} else if categoryId != "" {
+		SQL := "SELECT * FROM job WHERE category_id = ? LIMIT ? OFFSET ?"
+		rows, err = db.QueryContext(ctx, SQL, categoryId, limit, offset)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		SQL := "SELECT * FROM job LIMIT ? OFFSET ?"
+		rows, err = db.QueryContext(ctx, SQL, limit, offset)
+		if err != nil {
+			panic(err)
+		}
 	}
 	defer rows.Close()
 	jobs := []domain.Job{}
@@ -43,6 +66,38 @@ func (r *JobRespositoryImpl) GetAllJob(ctx context.Context, db *sql.DB, companyN
 		jobs = append(jobs, job)
 	}
 	return jobs, nil
+}
+
+func (r *JobRespositoryImpl) GetJobTotal(ctx context.Context, db *sql.DB, companyName string, categoryId string, limit int, offset int) (int, error) {
+	var err error
+	var total int
+
+	if companyName != "" && categoryId != "" {
+		SQL := "SELECT COUNT(*) FROM job WHERE category_id = ? AND company_name LIKE ? LIMIT ? OFFSET ?"
+		err = db.QueryRowContext(ctx, SQL, categoryId, companyName, limit, offset).Scan(&total)
+		if err != nil {
+			panic(err)
+		}
+	} else if companyName != "" {
+		SQL := "SELECT COUNT(*) FROM job WHERE company_name LIKE ? LIMIT ? OFFSET ?"
+		err = db.QueryRowContext(ctx, SQL, companyName, limit, offset).Scan(&total)
+		if err != nil {
+			panic(err)
+		}
+	} else if categoryId != "" {
+		SQL := "SELECT COUNT(*) FROM job WHERE category_id = ? LIMIT ? OFFSET ?"
+		err = db.QueryRowContext(ctx, SQL, categoryId, limit, offset).Scan(&total)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		SQL := "SELECT COUNT(*) FROM job LIMIT ? OFFSET ?"
+		err = db.QueryRowContext(ctx, SQL, limit, offset).Scan(&total)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return total, nil
 }
 
 func (r *JobRespositoryImpl) GetJobById(ctx context.Context, db *sql.DB, jobId string) (domain.Job, error) {
