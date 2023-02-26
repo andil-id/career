@@ -1,36 +1,43 @@
 package helper
 
 import (
+	"career/model/web"
 	"errors"
+	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Meta struct {
-	Limit      int `json:"limit,omitempty"`
-	Offset     int `json:"offset,omitempty"`
-	TotalPage  int `json:"total_page,omitempty"`
-	TotalData  int `json:"total_data,omitempty"`
-	StatusCode int `json:"status_code,omitempty"`
-	Message    any `json:"message,omitempty"`
+	Pagination any `json:"pagination"`
+	StatusCode int `json:"status_code"`
+	Message    any `json:"message"`
 }
 
 func ResponseSuccess(c *gin.Context, data any, meta Meta) {
 	metaData := Meta{}
 	switch c.Request.Method {
 	case "GET":
-		metaData = Meta{
-			Limit:      meta.Limit,
-			Offset:     meta.Offset,
-			TotalPage:  meta.TotalPage,
-			TotalData:  meta.TotalData,
-			StatusCode: meta.StatusCode,
-			Message:    "Data was successfully retrieved!",
+		_, isPagination := meta.Pagination.(web.Pagination)
+		log.Println(isPagination)
+		if isPagination {
+			metaData = Meta{
+				Pagination: meta.Pagination,
+				StatusCode: meta.StatusCode,
+				Message:    "Data was successfully retrieved!",
+			}
+		} else {
+			metaData = Meta{
+				Pagination: nil,
+				StatusCode: meta.StatusCode,
+				Message:    "Data was successfully retrieved!",
+			}
 		}
 
 	case "DELETE":
 		metaData = Meta{
-			StatusCode: meta.StatusCode,
+			StatusCode: http.StatusNoContent,
 			Message:    "Data was successfully deleted!",
 		}
 	case "POST", "PUT", "PATCH":
