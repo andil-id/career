@@ -9,11 +9,14 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"log"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	e "github.com/pkg/errors"
+	"golang.org/x/exp/slices"
 )
 
 type JobServiceImpl struct {
@@ -211,4 +214,85 @@ func (s *JobServiceImpl) DeleteJob(ctx context.Context, jobId string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *JobServiceImpl) UpdateJob(ctx context.Context, data web.UpdateJob, jobId string) (web.Job, error) {
+	res := web.Job{}
+	now := time.Now()
+	var currentBanner []string
+
+	err := s.Validate.Struct(data)
+	if err != nil {
+		return res, err
+	}
+	tx, err := s.DB.Begin()
+	if err != nil {
+		return res, err
+	}
+	defer helper.CommitOrRollback(tx)
+
+	currentJob, err := s.JobRepository.GetJobById(ctx, s.DB, jobId)
+	if err != nil {
+		return res, e.Wrap(exception.ErrNotFound, err.Error())
+	}
+
+	// * delete image in firebase
+	go func() {
+		file, err := os.OpenFile("firebase_errors.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// * delete company profile image
+		if err = helper.FirebaseImageDelete(context.Background(), currentJob.CompanyLogo); err != nil {
+			log.SetOutput(file)
+			log.Printf("Error when deleting firebase image: %v", err)
+			log.SetOutput(os.Stdout)
+		}
+
+		// * delete banner image
+		err = json.Unmarshal([]byte(currentJob.Banner), &currentBanner)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, url := range currentBanner {
+			if slices.Contains(data.Banner, url) {
+				continue
+			}
+			if err := helper.FirebaseImageDelete(context.Background(), url); err != nil {
+				log.SetOutput(file)
+				log.Printf("Error when deleting firebase image: %v", err)
+				log.SetOutput(os.Stdout)
+			}
+		}
+	}()
+
+	companyProfilePath, err := helper.FirebaseImageUploader(ctx, data.CompanyLogo, "compro")
+	if err != nil {
+		return res, err
+	}
+	bannerPathStr, err := json.Marshal(data.Banner)
+	if err != nil {
+		return res, err
+	}
+	newJob := domain.Job{
+		Id:          jobId,
+		CategoryId:  data.CategoryId,
+		CompanyLogo: companyProfilePath,
+		CompanyName: data.CompanyName,
+		Location:    data.Location,
+		Title:       data.Title,
+		Type:        data.Type,
+		Banner:      string(bannerPathStr),
+		Description: data.Description,
+		Email:       data.Email,
+		WebsiteUrl:  data.WebsiteUrl,
+		CreatedAt:   currentJob.CreatedAt,
+		UpdatedAt:   now,
+	}
+	err = s.JobRepository.UpdateJob(ctx, tx, newJob)
+	if err != nil {
+		return res, err
+	}
+	return res, nil
 }

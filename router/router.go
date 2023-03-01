@@ -7,10 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(job controller.JobController) *gin.Engine {
+func NewRouter(job controller.JobController, auth controller.AuthController, jobCategory controller.JobCategoryController) *gin.Engine {
 	// gin.SetMode(config.GinMode())
 	router := gin.Default()
-	router.Use(gin.Recovery())
+	// router.Use(middleware.Logging())
 	router.Use(middleware.ErrorAppHandler())
 
 	api := router.Group("/api")
@@ -19,6 +19,9 @@ func NewRouter(job controller.JobController) *gin.Engine {
 		api.GET("/jobs", job.GetAllJob)
 		api.GET("/job/:job-id", job.GetJobDetail)
 		api.DELETE("/job/:job-id", job.DeleteJob)
+		api.PATCH("/job", job.UpdateJob)
+		api.PATCH("/job-categories", jobCategory.GetAllJobCategory)
+		api.POST("/auth/login", auth.Login)
 	}
 	return router
 }

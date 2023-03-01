@@ -101,3 +101,31 @@ func FirebaseMultipleImageUploader(ctx context.Context, images []*multipart.File
 	}
 	return urls, nil
 }
+
+func FirebaseImageDelete(ctx context.Context, imagePath string) error {
+	bucketName := config.FirebaseBucketName()
+	opt := option.WithCredentialsFile("firebase-storage-sa.json")
+	app, err := firebase.NewApp(ctx, nil, opt)
+	if err != nil {
+		return err
+	}
+
+	// Initialize Storage client
+	client, err := app.Storage(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Get a reference to the image you want to delete
+	bucket, err := client.Bucket(bucketName)
+	if err != nil {
+		return err
+	}
+	imgRef := bucket.Object(imagePath)
+
+	// Delete the image
+	if err := imgRef.Delete(ctx); err != nil {
+		return err
+	}
+	return nil
+}

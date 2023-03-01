@@ -7,4 +7,5 @@ type JobController interface {
 	GetAllJob(c *gin.Context)
 	DeleteJob(c *gin.Context)
 	GetJobDetail(c *gin.Context)
+	UpdateJob(c *gin.Context)
 }

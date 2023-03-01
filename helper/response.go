@@ -10,7 +10,7 @@ import (
 )
 
 type Meta struct {
-	Pagination any `json:"pagination"`
+	Pagination any `json:"pagination,omitempty"`
 	StatusCode int `json:"status_code"`
 	Message    any `json:"message"`
 }

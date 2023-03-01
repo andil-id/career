@@ -23,7 +23,7 @@ func (r *JobCategoryRepositoryImpl) GetAllJobCategory(ctx context.Context, db *s
 	jobCategories := []domain.JobCategory{}
 	for rows.Next() {
 		jobCategory := domain.JobCategory{}
-		err := rows.Scan(&jobCategory.Id, &jobCategory.Name, &jobCategory.Image)
+		err := rows.Scan(&jobCategory.Id, &jobCategory.Name, &jobCategory.Image, &jobCategory.CreatedAt, &jobCategory.UpdatedAt)
 		if err != nil {
 			panic(err)
 		}

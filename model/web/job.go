@@ -33,3 +33,16 @@ type CreateJob struct {
 	Email       string                  `form:"email" binding:"required"`
 	WebsiteUrl  string                  `form:"website_url" binding:"required"`
 }
+
+type UpdateJob struct {
+	CategoryId  string                `form:"category_id" binding:"required"`
+	CompanyLogo *multipart.FileHeader `form:"company_logo" binding:"required"`
+	CompanyName string                `form:"company_name" binding:"required"`
+	Location    string                `form:"location" binding:"required"`
+	Title       string                `form:"title" binding:"required"`
+	Type        string                `form:"type" binding:"required"`
+	Banner      []string              `form:"banner" binding:"required"`
+	Description string                `form:"description" binding:"required"`
+	Email       string                `form:"email" binding:"required"`
+	WebsiteUrl  string                `form:"website_url" binding:"required"`
+}

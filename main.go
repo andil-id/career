@@ -22,11 +22,17 @@ func main() {
 	validate := validator.New()
 
 	jobRepository := repository.NewJobRespository()
+	adminRepository := repository.NewAdminRepository()
+	jobCategoryRepository := repository.NewJobCategoryRespository()
 
 	jobService := service.NewJobService(jobRepository, db, validate)
+	authService := service.NewAuthService(db, validate, adminRepository)
+	jobCategoryService := service.NewJobCategoryService(db, jobCategoryRepository)
 
 	jobController := controller.NewJobController(jobService)
+	authController := controller.NewAuthController(authService)
+	jobCategoryController := controller.NewJobCategoryController(jobCategoryService)
 
-	router := router.NewRouter(jobController)
+	router := router.NewRouter(jobController, authController, jobCategoryController)
 	router.Run(":" + config.AppPort())
 }
