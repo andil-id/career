@@ -120,8 +120,8 @@ func (r *JobRespositoryImpl) GetJobById(ctx context.Context, db *sql.DB, jobId s
 }
 
 func (r *JobRespositoryImpl) UpdateJob(ctx context.Context, tx *sql.Tx, job domain.Job) error {
-	SQL := "UPDATE job SET category_id=?, company_logo=?, company_name=?, location=?, title=?, type=?, banner=?, description=?, email=?, website_url=?, created_at=?, updated_at=? WHERE id = ?"
-	_, err := tx.ExecContext(ctx, SQL, job.CategoryId, job.CompanyLogo, job.CompanyName, job.Location, job.Title, job.Type, job.Banner, job.Description, job.Email, job.WebsiteUrl, job.CreatedAt, time.Now(), job.Id)
+	SQL := "UPDATE job SET category_id=?, location=?, title=?, type=?, banner=?, description=?, email=?, website_url=?, created_at=?, updated_at=? WHERE id = ?"
+	_, err := tx.ExecContext(ctx, SQL, job.CategoryId, job.Location, job.Title, job.Type, job.Banner, job.Description, job.Email, job.WebsiteUrl, job.CreatedAt, time.Now(), job.Id)
 	if err != nil {
 		return err
 	}

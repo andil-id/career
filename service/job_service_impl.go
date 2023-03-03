@@ -267,10 +267,6 @@ func (s *JobServiceImpl) UpdateJob(ctx context.Context, data web.UpdateJob, jobI
 		}
 	}()
 
-	companyProfilePath, err := helper.FirebaseImageUploader(ctx, data.CompanyLogo, "compro")
-	if err != nil {
-		return res, err
-	}
 	bannerPathStr, err := json.Marshal(data.Banner)
 	if err != nil {
 		return res, err
@@ -278,8 +274,6 @@ func (s *JobServiceImpl) UpdateJob(ctx context.Context, data web.UpdateJob, jobI
 	newJob := domain.Job{
 		Id:          jobId,
 		CategoryId:  data.CategoryId,
-		CompanyLogo: companyProfilePath,
-		CompanyName: data.CompanyName,
 		Location:    data.Location,
 		Title:       data.Title,
 		Type:        data.Type,
