@@ -1,2 +1,4 @@
 .env
+errors.log
+firebase_errors.log
 firebase-storage-sa.json
