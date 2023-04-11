@@ -244,9 +244,10 @@ func (s *JobServiceImpl) UpdateJob(ctx context.Context, data web.UpdateJob, jobI
 		}
 
 		// * delete company profile image
-		if err = helper.FirebaseImageDelete(context.Background(), currentJob.CompanyLogo); err != nil {
+		objErr, err := helper.FirebaseImageDelete(context.Background(), "https://firebasestorage.googleapis.com/v0/b/qerja-app-e5965.appspot.com/o/compro%2F0aacd690edeb5919078db664958535d8?alt=media")
+		if err != nil {
 			log.SetOutput(file)
-			log.Printf("Error when deleting firebase image: %v", err)
+			log.Printf("Error when deleting firebase image in object: %v, condition: %v", objErr, err)
 			log.SetOutput(os.Stdout)
 		}
 
@@ -259,9 +260,10 @@ func (s *JobServiceImpl) UpdateJob(ctx context.Context, data web.UpdateJob, jobI
 			if slices.Contains(data.Banner, url) {
 				continue
 			}
-			if err := helper.FirebaseImageDelete(context.Background(), url); err != nil {
+			objErr, err := helper.FirebaseImageDelete(context.Background(), url)
+			if err != nil {
 				log.SetOutput(file)
-				log.Printf("Error when deleting firebase image: %v", err)
+				log.Printf("Error when deleting firebase image in object: %v, condition: %v", objErr, err)
 				log.SetOutput(os.Stdout)
 			}
 		}
@@ -287,6 +289,22 @@ func (s *JobServiceImpl) UpdateJob(ctx context.Context, data web.UpdateJob, jobI
 	err = s.JobRepository.UpdateJob(ctx, tx, newJob)
 	if err != nil {
 		return res, err
+	}
+
+	res = web.Job{
+		Id:          jobId,
+		CategoryId:  data.CategoryId,
+		CompanyLogo: currentJob.CompanyLogo,
+		CompanyName: currentJob.CompanyName,
+		Location:    data.Location,
+		Title:       data.Title,
+		Type:        data.Type,
+		Banner:      data.Banner,
+		Description: data.Description,
+		Email:       data.Email,
+		WebsiteUrl:  data.WebsiteUrl,
+		CreatedAt:   currentJob.CreatedAt,
+		UpdatedAt:   now,
 	}
 	return res, nil
 }

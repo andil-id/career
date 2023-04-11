@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"mime/multipart"
+	"strings"
 
 	firebase "firebase.google.com/go"
 	"github.com/thanhpk/randstr"
@@ -102,30 +103,37 @@ func FirebaseMultipleImageUploader(ctx context.Context, images []*multipart.File
 	return urls, nil
 }
 
-func FirebaseImageDelete(ctx context.Context, imagePath string) error {
+func FirebaseImageDelete(ctx context.Context, imagePath string) (string, error) {
+	urlSplit := strings.Split(imagePath, "/")
+	objPath := strings.Replace(strings.Replace(urlSplit[len(urlSplit)-1], "?alt=media", "", 1), "%2F", "/", 1)
+
 	bucketName := config.FirebaseBucketName()
 	opt := option.WithCredentialsFile("firebase-storage-sa.json")
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
-		return err
+		log.Println("error 0", err)
+		return objPath, err
 	}
 
 	// Initialize Storage client
 	client, err := app.Storage(ctx)
 	if err != nil {
-		return err
+		log.Println("error 1", err)
+		return objPath, err
 	}
 
 	// Get a reference to the image you want to delete
 	bucket, err := client.Bucket(bucketName)
 	if err != nil {
-		return err
+		log.Println("error 2", err)
+		return objPath, err
 	}
-	imgRef := bucket.Object(imagePath)
+	imgRef := bucket.Object(objPath)
 
 	// Delete the image
 	if err := imgRef.Delete(ctx); err != nil {
-		return err
+		log.Println("error 3", err)
+		return objPath, err
 	}
-	return nil
+	return objPath, nil
 }

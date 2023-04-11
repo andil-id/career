@@ -20,7 +20,7 @@ func NewRouter(job controller.JobController, auth controller.AuthController, job
 		api.GET("/jobs", job.GetAllJob)
 		api.GET("/job/:job-id", job.GetJobDetail)
 		api.DELETE("/job/:job-id", middleware.JwtAuth(), job.DeleteJob)
-		api.PATCH("/job", middleware.JwtAuth(), job.UpdateJob)
+		api.PATCH("/job/:job-id", middleware.JwtAuth(), job.UpdateJob)
 		api.GET("/job-categories", jobCategory.GetAllJobCategory)
 		api.POST("/auth/login", auth.Login)
 	}

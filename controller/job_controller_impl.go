@@ -4,8 +4,6 @@ import (
 	"career/helper"
 	"career/model/web"
 	"career/service"
-	"errors"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -77,13 +75,19 @@ func (cl *JobControllerImpl) DeleteJob(c *gin.Context) {
 }
 
 func (cl *JobControllerImpl) UpdateJob(c *gin.Context) {
-	if true {
-		panic(errors.New("error occured"))
+	req := web.UpdateJob{}
+	err := c.Bind(&req)
+	if err != nil {
+		c.Error(err)
+		return
 	}
-	go func() {
-		log.Println("jalan ketiga")
-	}()
-	helper.ResponseSuccess(c, nil, helper.Meta{
+	jobId := c.Param("job-id")
+	res, err := cl.JobService.UpdateJob(c.Request.Context(), req, jobId)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	helper.ResponseSuccess(c, res, helper.Meta{
 		StatusCode: http.StatusOK,
 	})
 }
