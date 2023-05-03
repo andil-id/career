@@ -135,7 +135,7 @@ func (s *JobServiceImpl) GetAllJob(ctx context.Context, companyName string, cate
 		return res, pagination, e.Wrap(exception.ErrBadRequest, "offset parameter must greater than 0")
 	}
 
-	totalRecords, err := s.JobRepository.GetJobTotal(ctx, s.DB, companyName, categoryId, pagination.Limit, pagination.Offset-1)
+	totalRecords, err := s.JobRepository.GetJobTotal(ctx, s.DB, companyName, categoryId)
 	if err != nil {
 		return res, pagination, err
 	}
@@ -242,16 +242,6 @@ func (s *JobServiceImpl) UpdateJob(ctx context.Context, data web.UpdateJob, jobI
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		// * delete company profile image
-		objErr, err := helper.FirebaseImageDelete(context.Background(), "https://firebasestorage.googleapis.com/v0/b/qerja-app-e5965.appspot.com/o/compro%2F0aacd690edeb5919078db664958535d8?alt=media")
-		if err != nil {
-			log.SetOutput(file)
-			log.Printf("Error when deleting firebase image in object: %v, condition: %v", objErr, err)
-			log.SetOutput(os.Stdout)
-		}
-
-		// * delete banner image
 		err = json.Unmarshal([]byte(currentJob.Banner), &currentBanner)
 		if err != nil {
 			log.Fatal(err)

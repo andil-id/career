@@ -68,31 +68,31 @@ func (r *JobRespositoryImpl) GetAllJob(ctx context.Context, db *sql.DB, companyN
 	return jobs, nil
 }
 
-func (r *JobRespositoryImpl) GetJobTotal(ctx context.Context, db *sql.DB, companyName string, categoryId string, limit int, offset int) (int, error) {
+func (r *JobRespositoryImpl) GetJobTotal(ctx context.Context, db *sql.DB, companyName string, categoryId string) (int, error) {
 	var err error
 	var total int
 
 	if companyName != "" && categoryId != "" {
-		SQL := "SELECT COUNT(*) FROM job WHERE category_id = ? AND company_name LIKE ? LIMIT ? OFFSET ?"
-		err = db.QueryRowContext(ctx, SQL, categoryId, companyName, limit, offset).Scan(&total)
+		SQL := "SELECT COUNT(*) FROM job WHERE category_id = ? AND company_name LIKE ?"
+		err = db.QueryRowContext(ctx, SQL, categoryId, companyName).Scan(&total)
 		if err != nil {
 			panic(err)
 		}
 	} else if companyName != "" {
-		SQL := "SELECT COUNT(*) FROM job WHERE company_name LIKE ? LIMIT ? OFFSET ?"
-		err = db.QueryRowContext(ctx, SQL, companyName, limit, offset).Scan(&total)
+		SQL := "SELECT COUNT(*) FROM job WHERE company_name LIKE ?"
+		err = db.QueryRowContext(ctx, SQL, companyName).Scan(&total)
 		if err != nil {
 			panic(err)
 		}
 	} else if categoryId != "" {
-		SQL := "SELECT COUNT(*) FROM job WHERE category_id = ? LIMIT ? OFFSET ?"
-		err = db.QueryRowContext(ctx, SQL, categoryId, limit, offset).Scan(&total)
+		SQL := "SELECT COUNT(*) FROM job WHERE category_id = ?"
+		err = db.QueryRowContext(ctx, SQL, categoryId).Scan(&total)
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		SQL := "SELECT COUNT(*) FROM job LIMIT ? OFFSET ?"
-		err = db.QueryRowContext(ctx, SQL, limit, offset).Scan(&total)
+		SQL := "SELECT COUNT(*) FROM job"
+		err = db.QueryRowContext(ctx, SQL).Scan(&total)
 		if err != nil {
 			panic(err)
 		}
