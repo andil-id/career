@@ -3,7 +3,6 @@ package helper
 import (
 	"career/model/web"
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +19,6 @@ func ResponseSuccess(c *gin.Context, data any, meta Meta) {
 	switch c.Request.Method {
 	case "GET":
 		_, isPagination := meta.Pagination.(web.Pagination)
-		log.Println(isPagination)
 		if isPagination {
 			metaData = Meta{
 				Pagination: meta.Pagination,
