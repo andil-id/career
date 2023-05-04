@@ -142,6 +142,10 @@ func (s *JobServiceImpl) GetAllJob(ctx context.Context, companyName string, cate
 	pagination.RowCount = totalRecords
 	pagination.PageCount = (totalRecords + pagination.Limit - 1) / pagination.Limit
 
+	if pagination.Offset > pagination.PageCount {
+		return res, pagination, err
+	}
+
 	jobs, err := s.JobRepository.GetAllJob(ctx, s.DB, companyName, categoryId, pagination.Limit, pagination.Offset-1)
 	if err != nil {
 		return res, pagination, err
