@@ -10,5 +10,5 @@ type JobService interface {
 	GetJobDetail(ctx context.Context, jobId string) (web.Job, error)
 	CreateJob(ctx context.Context, data web.CreateJob) (web.Job, error)
 	UpdateJob(ctx context.Context, data web.UpdateJob, jobId string) (web.Job, error)
-	GetAllJob(ctx context.Context, companyName string, categoryId string, limit string, offset string) ([]web.Job, web.Pagination, error)
+	GetAllJob(ctx context.Context, companyName string, categoryId string, title string, limit string, offset string) ([]web.Job, web.Pagination, error)
 }

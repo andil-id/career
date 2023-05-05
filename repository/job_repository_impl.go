@@ -26,13 +26,37 @@ func (r *JobRespositoryImpl) CreateJob(ctx context.Context, tx *sql.Tx, job doma
 	return id, nil
 }
 
-func (r *JobRespositoryImpl) GetAllJob(ctx context.Context, db *sql.DB, companyName string, categoryId string, limit int, offset int) ([]domain.Job, error) {
+func (r *JobRespositoryImpl) GetAllJob(ctx context.Context, db *sql.DB, companyName string, categoryId string, title string, limit int, offset int) ([]domain.Job, error) {
 	var err error
 	var rows *sql.Rows
 
-	if companyName != "" && categoryId != "" {
+	if companyName != "" && categoryId != "" && title != "" {
+		SQL := "SELECT * FROM job WHERE category_id = ? AND company_name LIKE ? AND title LIKE ? LIMIT ? OFFSET ?"
+		rows, err = db.QueryContext(ctx, SQL, categoryId, companyName, "%"+title+"%", limit, offset)
+		if err != nil {
+			panic(err)
+		}
+	} else if companyName != "" && categoryId != "" {
 		SQL := "SELECT * FROM job WHERE category_id = ? AND company_name LIKE ? LIMIT ? OFFSET ?"
 		rows, err = db.QueryContext(ctx, SQL, categoryId, companyName, limit, offset)
+		if err != nil {
+			panic(err)
+		}
+	} else if companyName != "" && title != "" {
+		SQL := "SELECT * FROM job WHERE title LIKE ? AND company_name LIKE ? LIMIT ? OFFSET ?"
+		rows, err = db.QueryContext(ctx, SQL, "%"+title+"%", companyName, limit, offset)
+		if err != nil {
+			panic(err)
+		}
+	} else if categoryId != "" && title != "" {
+		SQL := "SELECT * FROM job WHERE title LIKE ? AND category_id LIKE ? LIMIT ? OFFSET ?"
+		rows, err = db.QueryContext(ctx, SQL, "%"+title+"%", categoryId, limit, offset)
+		if err != nil {
+			panic(err)
+		}
+	} else if title != "" {
+		SQL := "SELECT * FROM job WHERE title LIKE ? LIMIT ? OFFSET ?"
+		rows, err = db.QueryContext(ctx, SQL, "%"+title+"%", limit, offset)
 		if err != nil {
 			panic(err)
 		}
@@ -68,13 +92,37 @@ func (r *JobRespositoryImpl) GetAllJob(ctx context.Context, db *sql.DB, companyN
 	return jobs, nil
 }
 
-func (r *JobRespositoryImpl) GetJobTotal(ctx context.Context, db *sql.DB, companyName string, categoryId string) (int, error) {
+func (r *JobRespositoryImpl) GetJobTotal(ctx context.Context, db *sql.DB, companyName string, categoryId string, title string) (int, error) {
 	var err error
 	var total int
 
-	if companyName != "" && categoryId != "" {
+	if companyName != "" && categoryId != "" && title != "" {
+		SQL := "SELECT COUNT(*) FROM job WHERE category_id = ? AND company_name LIKE ? AND title LIKE ?"
+		err = db.QueryRowContext(ctx, SQL, categoryId, companyName, "%"+title+"%").Scan(&total)
+		if err != nil {
+			panic(err)
+		}
+	} else if companyName != "" && categoryId != "" {
 		SQL := "SELECT COUNT(*) FROM job WHERE category_id = ? AND company_name LIKE ?"
 		err = db.QueryRowContext(ctx, SQL, categoryId, companyName).Scan(&total)
+		if err != nil {
+			panic(err)
+		}
+	} else if companyName != "" && title != "" {
+		SQL := "SELECT COUNT(*) FROM job WHERE title LIKE ? AND company_name LIKE ?"
+		err = db.QueryRowContext(ctx, SQL, "%"+title+"%", companyName).Scan(&total)
+		if err != nil {
+			panic(err)
+		}
+	} else if title != "" && categoryId != "" {
+		SQL := "SELECT COUNT(*) FROM job WHERE category_id = ? AND title LIKE ?"
+		err = db.QueryRowContext(ctx, SQL, categoryId, "%"+title+"%").Scan(&total)
+		if err != nil {
+			panic(err)
+		}
+	} else if title != "" {
+		SQL := "SELECT COUNT(*) FROM job WHERE title LIKE ?"
+		err = db.QueryRowContext(ctx, SQL, "%"+title+"%").Scan(&total)
 		if err != nil {
 			panic(err)
 		}

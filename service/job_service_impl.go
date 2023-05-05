@@ -98,7 +98,7 @@ func (s *JobServiceImpl) CreateJob(ctx context.Context, data web.CreateJob) (web
 	return res, nil
 }
 
-func (s *JobServiceImpl) GetAllJob(ctx context.Context, companyName string, categoryId string, limit string, offset string) ([]web.Job, web.Pagination, error) {
+func (s *JobServiceImpl) GetAllJob(ctx context.Context, companyName string, categoryId string, title string, limit string, offset string) ([]web.Job, web.Pagination, error) {
 	var err error
 	var res []web.Job
 	var pagination = web.Pagination{
@@ -135,7 +135,7 @@ func (s *JobServiceImpl) GetAllJob(ctx context.Context, companyName string, cate
 		return res, pagination, e.Wrap(exception.ErrBadRequest, "offset parameter must greater than 0")
 	}
 
-	totalRecords, err := s.JobRepository.GetJobTotal(ctx, s.DB, companyName, categoryId)
+	totalRecords, err := s.JobRepository.GetJobTotal(ctx, s.DB, companyName, categoryId, title)
 	if err != nil {
 		return res, pagination, err
 	}
@@ -146,7 +146,7 @@ func (s *JobServiceImpl) GetAllJob(ctx context.Context, companyName string, cate
 		return []web.Job{}, pagination, err
 	}
 
-	jobs, err := s.JobRepository.GetAllJob(ctx, s.DB, companyName, categoryId, pagination.Limit, pagination.Offset-1)
+	jobs, err := s.JobRepository.GetAllJob(ctx, s.DB, companyName, categoryId, title, pagination.Limit, pagination.Offset-1)
 	if err != nil {
 		return res, pagination, err
 	}

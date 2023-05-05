@@ -38,10 +38,11 @@ func (cl *JobControllerImpl) CreateJob(c *gin.Context) {
 func (cl *JobControllerImpl) GetAllJob(c *gin.Context) {
 	limit := c.Query("limit")
 	offset := c.Query("offset")
+	title := c.Query("title")
 	categoryId := c.Query("categoryId")
 	companyName := c.Query("companyName")
 
-	res, pagination, err := cl.JobService.GetAllJob(c.Request.Context(), companyName, categoryId, limit, offset)
+	res, pagination, err := cl.JobService.GetAllJob(c.Request.Context(), companyName, categoryId, title, limit, offset)
 	if err != nil {
 		c.Error(err)
 		return
